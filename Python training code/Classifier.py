@@ -5,8 +5,9 @@ import numpy as np
 from glob import glob
 from os.path import basename
 from sklearn.ensemble import RandomForestClassifier
+from micromlgen import port
 
-fileNames = ["Gesture\Left swipe gesture.csv","Gesture\Right swipe gesture.csv","Gesture\Slam gesture.csv"]
+fileNames = ["Gesture\LeftSwipeGesture.csv","Gesture\RightSwipeGesture.csv","Gesture\SlamGesture.csv"]
 
 def load_features(files):
     dataset = None
@@ -25,8 +26,6 @@ def get_classifier(features):
     X, y = features[:, :-1], features[:, -1]
 
     return RandomForestClassifier(20, max_depth=10).fit(X, y)
-
-from micromlgen import port
 
 if __name__ == '__main__':
     features, classmap = load_features(fileNames)

@@ -209,7 +209,7 @@ void readFile() {
 
 void appendFile() {
   String data;
-  File file = LittleFS.open("./Gesture.csv", "a");
+  File file = LittleFS.open("./Gesture.txt", "a");
   if (!file) {
     Serial.println("Failed to open file for appending");
     return;
@@ -218,12 +218,13 @@ void appendFile() {
   {
       int index = i*NUM_AXES;
       data = String(features[index])+","+String(features[index+1])+","+String(features[index+2])+","+(features[index+3])+","+(features[index+4])+","+(features[index+5])+"\n"; 
-      if (file.print(""+data)) {
+  if (file.print(""+data)) {
     Serial.println("Message appended");
   } else {
     Serial.println("Append failed");
   }
   }
+  
    if (file.print("\n\n")) {
     Serial.println("added space");
   } else {

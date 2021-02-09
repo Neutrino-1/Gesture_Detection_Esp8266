@@ -3,25 +3,27 @@
 
 // Structure example to receive data
 // Must match the sender structure
-typedef struct MessageFromWatch {
-    int id;
-    int relay_1;
-    int relay_2;
-    int relay_3;
-} MessageFromWatch;
+typedef struct message {
+    int relay1;
+    int relay2;
+    int relay3;
+    int relay4;
+} message;
 
 // Create a struct_message called myData
-MessageFromWatch relayData;
+message msg;
 
 // Callback function that will be executed when data is received
 void OnDataRecv(uint8_t * mac, uint8_t *incomingData, uint8_t len) {
-  memcpy(&relayData, incomingData, sizeof(relayData));
-  Serial.print("Int: ");
-  Serial.println(relayData.relay_1);
-  Serial.print("Int: ");
-  Serial.println(relayData.relay_2);
-  Serial.print("Int: ");
-  Serial.println(relayData.relay_3);
+  memcpy(&msg, incomingData, sizeof(msg));
+  Serial.print("Relay - 1");
+  Serial.println(msg.relay1);
+  Serial.print("Relay - 2");
+  Serial.println(msg.relay2);
+  Serial.print("Relay - 3");
+  Serial.println(msg.relay3);
+  Serial.print("Relay - 4");
+  Serial.println(msg.relay4);
   Serial.println();
 }
  

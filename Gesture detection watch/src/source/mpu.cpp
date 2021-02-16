@@ -6,14 +6,18 @@ double baseline[NUM_AXES]; // Used for callibration
 
 Eloquent::ML::Port::RandomForest classifier; //This class is inside the model.h file
 
-// REPLACE WITH RECEIVER MAC Address (A4:CF:12:D9:25:66)
-uint8_t broadcastAddress[] = {0x2C, 0xF4, 0x32, 0x5E, 0x1E, 0x64};
+// REPLACE WITH RECEIVER MAC Address (84:CC:A8:83:76:BE)
+uint8_t broadcastAddress[] = {0x84, 0xCC, 0xA8, 0x83, 0x76, 0xBE};
 
 //Create a struct_message called relay values
 struct_message relay_values;
 
 bool guestureStarted = false;
-int toggle = 0;
+
+int relayStatus_1 = 0;
+int relayStatus_2 = 0;
+int relayStatus_3 = 0;
+
 void setupMPU()
 {
     Serial.println("find MPU6050 chip");
@@ -70,29 +74,52 @@ boolean calculateMotion(int currentDisplay)
 
 /*This function will do the detection*/
 void classify() {
-    WiFi.mode(WIFI_STA);
+    // WiFi.disconnect();
+    relay_values.relay1 = relayStatus_1;
+    relay_values.relay2 = relayStatus_2;
+    relay_values.relay3 = relayStatus_3;
+    relay_values.relay4 = 0;
     Serial.print("Detected gesture: ");
     String gesture = classifier.predictLabel(features);
     Serial.println(gesture);
     setAction(gesture);
     delay(1000);
-    if(gesture == "Left swipe gesture")
+    if(gesture == "LeftSwipeGesture")
     {
-        setAction("Turned on light");
-        relay_values.relay_1 = 1;
+        if(!relayStatus_1)
+        setAction("Turn on device 1");
+        else
+        setAction("Turn off device 1");
+        relayStatus_1 = !relayStatus_1;
+        relay_values.relay1 = relayStatus_1;
     }
-    else if(gesture == "Right swipe gesture")
+    else if(gesture == "RightSwipeGesture")
     {
-        setAction("Turned off light");
-        relay_values.relay_1 = 0;
+        if(!relayStatus_2)
+        setAction("Turn on device 2");
+        else
+        setAction("Turn off device 2");
+        relayStatus_2 = !relayStatus_2;
+        relay_values.relay2 = relayStatus_2;
     }
-    else if(gesture == "Slam gesture")
+    else if(gesture == "SlamGesture")
     {   
-        relay_values.relay_2 = !toggle;
-        setAction("Toggle soldering station!");
+        if(!relayStatus_3)
+        setAction("Turn on device 3");
+        else
+        setAction("Turn off device 3");
+        relayStatus_3 = !relayStatus_3;
+        relay_values.relay3 = relayStatus_3;
     }
+    WiFi.disconnect();
+    WiFi.mode(WIFI_STA);
+    delay(10);
     esp_now_send(broadcastAddress, (uint8_t *) &relay_values, sizeof(relay_values));
-    delay(3000);
+    int connection = WiFi.status() != WL_CONNECTED ? 0 : 1;
+    Serial.println("Connection Status: " + String(connection));
+   // delay(3000);
+    setAction("Do some Action!");
+    WiFi.mode(WIFI_OFF);
 }
 
 
@@ -129,6 +156,7 @@ bool motionDetected(float ax, float ay, float az) {
 
 void calibrate()
 {
+    // WiFi.disconnect();
     sensors_event_t a, g, temp;
     Serial.println("Calibrating...");
     for (int i = 0; i < 10; i++) {

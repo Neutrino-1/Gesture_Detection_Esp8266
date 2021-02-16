@@ -14,11 +14,12 @@ void setup()
   setupMPU();
   while (wifiConnected());
   startTime();
-  delay(5000);
+  delay(3000);
   calibrate();
-  setupEspNow();
   initUI();
+  disconnetWifi();
   idleTime = millis();
+  setupEspNow();
 }
 
 void loop()

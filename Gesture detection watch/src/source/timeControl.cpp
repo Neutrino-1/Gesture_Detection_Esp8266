@@ -38,9 +38,6 @@ byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming & outgoing packets
 
 time_t getNtpTime()
 {
-    WiFi.mode(WIFI_STA);
-    startWiFiManager();
-    delay(1000);
     IPAddress ntpServerIP; // NTP server's ip address
 
     while (Udp.parsePacket() > 0)
@@ -70,7 +67,6 @@ time_t getNtpTime()
             return secsSince1900 - 2208988800UL + timeZone;
         }
     }
-    WiFi.mode(WIFI_OFF);
     // Serial.println("No NTP Response :-(");
     return 0; // return 0 if unable to get the time
 }

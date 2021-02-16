@@ -15,8 +15,6 @@ void setAction(String preditctedAction)
 {
     action  = preditctedAction;
     ui.update();
-    delay(1000);
-    action  = "Do some Action!";
 }
 
 void clock(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)

@@ -7,10 +7,10 @@
 
 // Must match the receiver structure
 typedef struct struct_message {
-    int id;
-    int relay_1;
-    int relay_2;
-    int relay_3;
+    int relay1;
+    int relay2;
+    int relay3;
+    int relay4;
 } struct_message;
 
 #define TRUNCATE 20 // To limit the readings between +/- 20

@@ -10,6 +10,12 @@
 #include <Wire.h>
 #include "model.h" //Replace this with your model file
 
+#include <ESP8266WiFi.h>
+#include <espnow.h>
+
+// REPLACE WITH RECEIVER MAC Address
+uint8_t receiverAddress[] = {0x84, 0xCC, 0xA8, 0x83, 0x76, 0xBE}; // 84:CC:A8:83:76:BE
+
 #define TRUNCATE 20 // To limit the readings between +/- 20
 #define ACCEL_THRESHOLD 5 //Adjust this to change when the detection should trigger
 #define NUM_SAMPLES 100 //Number of smaples to be read, during motion detection
@@ -33,6 +39,34 @@ Eloquent::ML::Port::RandomForest classifier; //This class is inside the model.h 
 void ICACHE_RAM_ATTR IntCallback()
 {
   StartDetection = true;
+}
+
+// Structure example to send data
+// Must match the receiver structure
+typedef struct struct_message {
+    int relay1;
+    int relay2;
+    int relay3;
+    int relay4;
+} struct_message;
+
+// Create a struct_message called myData
+struct_message myData;
+
+int relayStatus_1 = 0;
+int relayStatus_2 = 0;
+int relayStatus_3 = 0;
+int relayStatus_4 = 0;
+
+// Callback when data is sent
+void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
+  Serial.print("Last Packet Send Status: ");
+  if (sendStatus == 0){
+    Serial.println("Delivery success");
+  }
+  else{
+    Serial.println("Delivery fail");
+  }
 }
 
 /*Code for callibration
@@ -107,6 +141,21 @@ void classify() {
     String gesture = classifier.predictLabel(features);
     Serial.println(gesture);
     testdrawchar(gesture);
+    if(gesture == "LeftSwipeGesture")
+   {
+    relayStatus_1 = !relayStatus_1;
+     myData.relay1 = relayStatus_1; 
+   }
+   else if(gesture == "RightSwipeGesture")
+   {
+    relayStatus_2 = !relayStatus_2;
+      myData.relay2 = relayStatus_2;    
+   }
+   else if(gesture == "SlamGesture")
+   {   relayStatus_3 = !relayStatus_3;
+      myData.relay3 = relayStatus_3;    
+   }
+   esp_now_send(receiverAddress, (uint8_t *) &myData, sizeof(myData));
     delay(2000);
     testdrawchar("Do some gesture!");
 }
@@ -115,7 +164,7 @@ void setup() {
   Serial.begin(115200);
   pinMode(INT_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(INT_PIN), IntCallback, FALLING);
-
+  
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
     Serial.println(F("SSD1306 allocation failed"));
     for(;;); // Don't proceed, loop forever
@@ -138,6 +187,20 @@ void setup() {
   Serial.println("");
   delay(100);
   calibrate();
+   // Set device as a Wi-Fi Station
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  // Init ESP-NOW
+  if (esp_now_init() != 0) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
+  }
+
+  esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);   
+  esp_now_register_send_cb(OnDataSent);   // this function will get called once all data is sent
+  esp_now_add_peer(receiverAddress, ESP_NOW_ROLE_SLAVE, 1, NULL, 0);
+
+  Serial.println("ESP NOW Initialized.");
 }
 
 void loop() {

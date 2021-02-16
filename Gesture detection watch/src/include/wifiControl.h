@@ -7,3 +7,4 @@
 
 void startWiFiManager();
 boolean wifiConnected();
+void disconnetWifi();

@@ -2,4 +2,3 @@
 #include <espnow.h>
 
 void setupEspNow();
-void unSetEspNow();

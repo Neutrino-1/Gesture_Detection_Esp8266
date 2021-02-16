@@ -2,7 +2,9 @@
 
 void startWiFiManager()
 {
-    WiFi.setAutoReconnect(true);
+    // WiFi.mode(WIFI_STA);
+    // WiFi.begin("INTERNET","ZXCV@098");
+    // WiFi.setAutoReconnect(true);
     WiFiManager wifiManager;
     wifiManager.setDebugOutput(false);
     if (!wifiManager.autoConnect("Enter Credentials", "password"))
@@ -12,6 +14,12 @@ void startWiFiManager()
         ESP.reset();
         delay(5000);
     }
+}
+
+void disconnetWifi()
+{
+    WiFi.mode(WIFI_AP);
+    WiFi.channel(1);
 }
 
 boolean wifiConnected()
